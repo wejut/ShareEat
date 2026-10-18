@@ -1,0 +1,2 @@
+merchant-order-service/merchant-server/src/main/resources/application-local.yml
+merchant-order-service/merchant-server/src/main/resources/application-dev.yml

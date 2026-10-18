@@ -1,0 +1,51 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: campus-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: asdwlkji
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./social-discovery-service/src/main/resources/db/shareeat_social.sql:/docker-entrypoint-initdb.d/02-shareeat_social.sql:ro
+      - ./merchant-order-service/merchant-server/src/main/resources/shareeat_merchant.sql:/docker-entrypoint-initdb.d/03-shareeat_merchant.sql:ro
+    networks:
+      - campus-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pasdwlkji"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: campus-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "asdwlkji", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - campus-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "asdwlkji", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  campus-net:
+    name: smart-campus-net
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
